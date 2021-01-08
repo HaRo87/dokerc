@@ -1,6 +1,7 @@
 import click
 import logging
 import os
+import re
 from typing import NoReturn
 
 from dokerc.config.config import (
@@ -8,9 +9,13 @@ from dokerc.config.config import (
     Config,
     Server,
     User,
+    Session,
     create_config,
     ConfigError,
+    get_config,
 )
+
+from dokerc.client.session import start_new_session, SessionError, end_session
 
 log_handler = logging.StreamHandler()
 log_handler.setLevel(logging.INFO)
@@ -22,6 +27,8 @@ logging.basicConfig(level=logging.NOTSET, handlers=[log_handler])
 logger = logging.getLogger("DOKERC")
 
 config_option = click.option("--config", "-c", help="custom config file")
+
+token_re = re.compile(r"/sessions/([\d|\w]*)")
 
 
 def global_options(o):
@@ -55,6 +62,7 @@ def init(force, config):
                     default="y",
                     abort=True,
                 )
+                force = True
         else:
             if os.path.isfile(click.format_filename(config)):
                 click.echo("Config file already present and no force flag provided.")
@@ -63,7 +71,50 @@ def init(force, config):
                     default="y",
                     abort=True,
                 )
+                force = True
         create_config_file(filename=config, force=force)
+
+
+@cli.command()
+@global_options
+def start_session(config):
+    try:
+        conf = get_config(config)
+    except ConfigError as ce:
+        logger.error(ce)
+    try:
+        res = start_new_session(server=conf.server)
+        token = token_re.findall(res)[0]
+        conf = update_token(config=conf, token=token)
+        try:
+            create_config(config=conf, file=config, force=True)
+        except ConfigError as ce:
+            logger.error(ce)
+        logger.info("New session started")
+    except SessionError as se:
+        logger.error(se)
+
+
+@cli.command()
+@global_options
+def stop_session(config):
+    try:
+        conf = get_config(config)
+    except ConfigError as ce:
+        logger.error(ce)
+    try:
+        res = end_session(server=conf.server, token=conf.session.token)
+        if res:
+            logger.info("Session stopped")
+            conf = update_token(config=conf, token="")
+            try:
+                create_config(config=conf, file=config, force=True)
+            except ConfigError as ce:
+                logger.error(ce)
+        else:
+            logger.error("Unable to stop session")
+    except SessionError as se:
+        logger.error(se)
 
 
 def create_config_file(filename: str, force: bool) -> NoReturn:
@@ -90,8 +141,22 @@ def create_config_file(filename: str, force: bool) -> NoReturn:
             server_endpoint,
         ),
         User(user_name),
+        Session(""),
     )
     try:
         create_config(config=conf, file=filename, force=force)
     except ConfigError as ce:
         logger.error(ce)
+
+
+def update_token(config: Config, token: str) -> Config:
+    conf = Config(
+        Server(
+            config.server.address,
+            int(config.server.port),
+            config.server.endpoint,
+        ),
+        User(config.user.name),
+        Session(token),
+    )
+    return conf

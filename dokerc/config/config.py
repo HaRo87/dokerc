@@ -25,9 +25,14 @@ class User(NamedTuple):
     name: str
 
 
+class Session(NamedTuple):
+    token: str
+
+
 class Config(NamedTuple):
     server: Server
     user: User
+    session: Session
 
 
 def check_for_default_config() -> bool:
@@ -52,6 +57,7 @@ def get_config(file="") -> Config:
 
     server = config_parser["SERVER"]
     user = config_parser["USER"]
+    session = config_parser["SESSION"]
 
     dok_config = Config(
         Server(
@@ -61,6 +67,9 @@ def get_config(file="") -> Config:
         ),
         User(
             user["name"],
+        ),
+        Session(
+            session["token"],
         ),
     )
 
@@ -103,5 +112,6 @@ def _write_config(config: Config, file: str) -> NoReturn:
         "endpoint": config.server.endpoint,
     }
     config_parser["USER"] = {"name": config.user.name}
+    config_parser["SESSION"] = {"token": config.session.token}
     with open(file, "w") as conf:
         config_parser.write(conf)

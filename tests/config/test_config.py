@@ -78,6 +78,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
         with self.assertRaises(config.ConfigError) as ce:
             config.validate_config(conf)
@@ -93,6 +94,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
         with self.assertRaises(config.ConfigError) as ce:
             config.validate_config(conf)
@@ -108,6 +110,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "",
             ),
+            config.Session(""),
         )
         with self.assertRaises(config.ConfigError) as ce:
             config.validate_config(conf)
@@ -123,6 +126,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
         config.validate_config(conf)
 
@@ -137,6 +141,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         with tempfile.TemporaryDirectory() as dir:
@@ -162,6 +167,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         with tempfile.TemporaryDirectory() as dir:
@@ -189,6 +195,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         with self.assertRaises(config.ConfigError) as ce:
@@ -211,6 +218,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         config.create_config(config=conf, file=file_path)
@@ -235,6 +243,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         config.create_config(config=conf)
@@ -257,6 +266,7 @@ class TestConfig(unittest.TestCase):
             config.User(
                 "Tigger",
             ),
+            config.Session(""),
         )
 
         config.create_config(config=conf, file=file_path, force=True)
