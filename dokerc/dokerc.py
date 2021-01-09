@@ -24,6 +24,8 @@ from dokerc.command.session import (
 
 from dokerc.command.user import get_users
 
+from dokerc.command.task import add_task, get_tasks, update_task
+
 log_handler = logging.StreamHandler()
 log_handler.setLevel(logging.INFO)
 log_formatter = logging.Formatter("%(levelname)s [%(module)s] : %(message)s")
@@ -36,6 +38,7 @@ logger = logging.getLogger("DOKERC")
 config_option = click.option("--config", "-c", help="custom config file")
 token_option = click.option("--token", "-t", help="custom session token")
 user_option = click.option("--user", "-u", help="custom user name")
+id_argument = click.argument("id", required=True)
 
 
 def global_options(o):
@@ -47,6 +50,11 @@ def sub_global_option(s):
     s = user_option(s)
     s = token_option(s)
     return s
+
+
+def sub_global_args(a):
+    a = id_argument(a)
+    return a
 
 
 @click.group()
@@ -62,8 +70,14 @@ def session():
 
 
 @cli.group(chain=True)
-def user():
+def users():
     """All commands related to users"""
+    pass
+
+
+@cli.group(chain=True)
+def tasks():
+    """All commands related to tasks"""
     pass
 
 
@@ -147,14 +161,61 @@ def leave(config, user, token):
         logger.error(ce)
 
 
-@user.command()
+@users.command()
 @global_options
 @sub_global_option
 def list(config, user, token):
-    """Adds you to the current active Doker session"""
+    """Lists all user who are part of the session"""
     try:
         conf = get_config(config)
         get_users(config=conf, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@tasks.command()
+@global_options
+@sub_global_option
+def get(config, user, token):
+    """Gets all tasks which are part of the session"""
+    try:
+        conf = get_config(config)
+        get_tasks(config=conf, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@tasks.command()
+@global_options
+@sub_global_option
+@sub_global_args
+@click.option("--summary", help="short summary")
+def add(config, user, token, id, summary):
+    """Adds a new task to the session"""
+    try:
+        conf = get_config(config)
+        add_task(config=conf, token=token, id=id, summary=summary)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@tasks.command()
+@global_options
+@sub_global_option
+@sub_global_args
+@click.option("--effort", required=True, type=float, help="effort")
+@click.option("--std", required=True, type=float, help="standard deviation")
+def update(config, user, token, id, effort, std):
+    """Adds a new task to the session"""
+    try:
+        conf = get_config(config)
+        update_task(
+            config=conf,
+            token=token,
+            id=id,
+            effort=effort,
+            standard_deviation=std,
+        )
     except ConfigError as ce:
         logger.error(ce)
 

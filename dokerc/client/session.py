@@ -1,5 +1,6 @@
 import json
 import requests
+from typing import NoReturn
 from dokerc.config.config import Server
 
 
@@ -23,7 +24,7 @@ def start_new_session(server: Server) -> str:
         raise SessionError("Unable to reach backend")
 
 
-def join_existing_session(server: Server, token: str, name: str) -> bool:
+def join_existing_session(server: Server, token: str, name: str) -> NoReturn:
     url = "{address}:{port}{endpoint}/sessions/{token}/users".format(
         address=server.address,
         port=server.port,
@@ -32,15 +33,15 @@ def join_existing_session(server: Server, token: str, name: str) -> bool:
     )
     try:
         res = requests.post(url, data={"name": name})
-        if res.status_code == 200:
-            return True
-        else:
-            return False
+        if res.status_code != 200:
+            values = res.json()
+            raise SessionError(values["reason"])
+
     except requests.exceptions.ConnectionError:
-        return False
+        raise SessionError("Unable to reach backend")
 
 
-def leave_existing_session(server: Server, token: str, name: str) -> bool:
+def leave_existing_session(server: Server, token: str, name: str) -> NoReturn:
     url = "{address}:{port}{endpoint}/sessions/{token}/users/{user}".format(
         address=server.address,
         port=server.port,
@@ -50,23 +51,23 @@ def leave_existing_session(server: Server, token: str, name: str) -> bool:
     )
     try:
         res = requests.delete(url)
-        if res.status_code == 200:
-            return True
-        else:
-            return False
+        if res.status_code != 200:
+            values = res.json()
+            raise SessionError(values["reason"])
+
     except requests.exceptions.ConnectionError:
-        return False
+        raise SessionError("Unable to reach backend")
 
 
-def end_session(server: Server, token: str) -> bool:
+def end_session(server: Server, token: str) -> NoReturn:
     url = "{address}:{port}{endpoint}/sessions/{token}".format(
         address=server.address, port=server.port, endpoint=server.endpoint, token=token
     )
     try:
         res = requests.delete(url)
-        if res.status_code == 200:
-            return True
-        else:
-            return False
+        if res.status_code != 200:
+            values = res.json()
+            raise SessionError(values["reason"])
+
     except requests.exceptions.ConnectionError:
-        return False
+        raise SessionError("Unable to reach backend")

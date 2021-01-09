@@ -15,7 +15,7 @@ def get_users(config: Config, token: str) -> NoReturn:
         users = get_users_from_session(server=config.server, token=config.session.token)
         if users:
             for user in users:
-                click.echo(user)
+                click.echo("User: {user}".format(user=user))
         else:
             logger.info("No users joined the session so far")
     except UserError as ue:
