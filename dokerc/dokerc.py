@@ -24,7 +24,21 @@ from dokerc.command.session import (
 
 from dokerc.command.user import get_users
 
-from dokerc.command.task import add_task, get_tasks, update_task
+from dokerc.command.task import (
+    add_task,
+    clear_estimate,
+    delete_task,
+    get_tasks,
+    update_task,
+)
+
+from dokerc.command.estimate import (
+    add_estimate,
+    delete_estimate,
+    get_estimate,
+    get_estimates,
+    list_distant_users,
+)
 
 log_handler = logging.StreamHandler()
 log_handler.setLevel(logging.INFO)
@@ -63,21 +77,27 @@ def cli():
     pass
 
 
-@cli.group(chain=True)
+@cli.group()
 def session():
     """All commands related to session handling"""
     pass
 
 
-@cli.group(chain=True)
+@cli.group()
 def users():
     """All commands related to users"""
     pass
 
 
-@cli.group(chain=True)
+@cli.group()
 def tasks():
     """All commands related to tasks"""
+    pass
+
+
+@cli.group()
+def estimates():
+    """All commands related to estimates"""
     pass
 
 
@@ -216,6 +236,115 @@ def update(config, user, token, id, effort, std):
             effort=effort,
             standard_deviation=std,
         )
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@tasks.command()
+@global_options
+@sub_global_option
+@sub_global_args
+def remove(config, user, token, id):
+    """Removes a task from the session"""
+    try:
+        conf = get_config(config)
+        delete_task(
+            config=conf,
+            token=token,
+            id=id,
+        )
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@tasks.command()
+@global_options
+@sub_global_option
+@sub_global_args
+def clear(config, user, token, id):
+    """Clears the estimate of a task"""
+    try:
+        conf = get_config(config)
+        clear_estimate(
+            config=conf,
+            token=token,
+            id=id,
+        )
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@estimates.command()
+@global_options
+@sub_global_option
+@sub_global_args
+@click.option("--best", required=True, type=float, help="best case")
+@click.option("--most", required=True, type=float, help="most likely case")
+@click.option("--worst", required=True, type=float, help="worst case")
+def submit(config, user, token, id, best, most, worst):
+    """Submits a new estimate to the session"""
+    try:
+        conf = get_config(config)
+        add_estimate(
+            config=conf,
+            token=token,
+            id=id,
+            user=user,
+            best_case=best,
+            most_likely_case=most,
+            worst_case=worst,
+        )
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@estimates.command()
+@global_options
+@sub_global_option
+def all(config, user, token):
+    """Shows all estimates which are part of the session"""
+    try:
+        conf = get_config(config)
+        get_estimates(config=conf, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@estimates.command()
+@global_options
+@sub_global_option
+@sub_global_args
+def calc(config, user, token, id):
+    """Shows the calculated delphi estimate for the specified task"""
+    try:
+        conf = get_config(config)
+        get_estimate(config=conf, token=token, id=id)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@estimates.command()
+@global_options
+@sub_global_option
+@sub_global_args
+def distant(config, user, token, id):
+    """Shows the users who had the biggest distance between their estimates"""
+    try:
+        conf = get_config(config)
+        list_distant_users(config=conf, token=token, id=id)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@estimates.command()
+@global_options
+@sub_global_option
+@sub_global_args
+def delete(config, user, token, id):
+    """Deletes the estimate of a specified user for a specified task"""
+    try:
+        conf = get_config(config)
+        delete_estimate(config=conf, token=token, id=id, user=user)
     except ConfigError as ce:
         logger.error(ce)
 

@@ -83,3 +83,41 @@ def update_task_of_session(
 
     except requests.exceptions.ConnectionError:
         raise TaskError("Unable to reach backend")
+
+
+def delete_task_from_session(server: Server, token: str, id: str) -> NoReturn:
+    url = "{address}:{port}{endpoint}/sessions/{token}/workpackages/{id}".format(
+        address=server.address,
+        port=server.port,
+        endpoint=server.endpoint,
+        token=token,
+        id=id,
+    )
+    try:
+        res = requests.delete(url)
+        if res.status_code != 200:
+            values = res.json()
+            raise TaskError(values["reason"])
+
+    except requests.exceptions.ConnectionError:
+        raise TaskError("Unable to reach backend")
+
+
+def clear_estimate_of_task(server: Server, token: str, id: str) -> NoReturn:
+    url = (
+        "{address}:{port}{endpoint}/sessions/{token}/workpackages/{id}/estimate".format(
+            address=server.address,
+            port=server.port,
+            endpoint=server.endpoint,
+            token=token,
+            id=id,
+        )
+    )
+    try:
+        res = requests.delete(url)
+        if res.status_code != 200:
+            values = res.json()
+            raise TaskError(values["reason"])
+
+    except requests.exceptions.ConnectionError:
+        raise TaskError("Unable to reach backend")

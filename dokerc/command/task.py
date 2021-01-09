@@ -4,6 +4,8 @@ from typing import NoReturn
 from dokerc.config.config import Config
 from dokerc.client.task import (
     add_task_to_session,
+    clear_estimate_of_task,
+    delete_task_from_session,
     get_tasks_from_session,
     update_task_of_session,
     TaskError,
@@ -60,5 +62,33 @@ def update_task(
             standard_deviation=standard_deviation,
         )
         logger.info("Task updated")
+    except TaskError as te:
+        logger.error(te)
+
+
+def delete_task(config: Config, token: str, id: str) -> NoReturn:
+    if token:
+        config = update_token(config=config, token=token)
+    try:
+        delete_task_from_session(
+            server=config.server,
+            token=config.session.token,
+            id=id,
+        )
+        logger.info("Task removed")
+    except TaskError as te:
+        logger.error(te)
+
+
+def clear_estimate(config: Config, token: str, id: str) -> NoReturn:
+    if token:
+        config = update_token(config=config, token=token)
+    try:
+        clear_estimate_of_task(
+            server=config.server,
+            token=config.session.token,
+            id=id,
+        )
+        logger.info("Cleared estimate of task")
     except TaskError as te:
         logger.error(te)
