@@ -15,7 +15,14 @@ from dokerc.config.config import (
     get_config,
 )
 
-from dokerc.client.session import start_new_session, SessionError, end_session
+from dokerc.command.session import (
+    start_session,
+    stop_session,
+    join_session,
+    leave_session,
+)
+
+from dokerc.command.user import get_users
 
 log_handler = logging.StreamHandler()
 log_handler.setLevel(logging.INFO)
@@ -27,8 +34,8 @@ logging.basicConfig(level=logging.NOTSET, handlers=[log_handler])
 logger = logging.getLogger("DOKERC")
 
 config_option = click.option("--config", "-c", help="custom config file")
-
-token_re = re.compile(r"/sessions/([\d|\w]*)")
+token_option = click.option("--token", "-t", help="custom session token")
+user_option = click.option("--user", "-u", help="custom user name")
 
 
 def global_options(o):
@@ -36,8 +43,27 @@ def global_options(o):
     return o
 
 
-@click.group(chain=True)
+def sub_global_option(s):
+    s = user_option(s)
+    s = token_option(s)
+    return s
+
+
+@click.group()
 def cli():
+    """DokerC CLI client for the Delphi Planning Poker Backend"""
+    pass
+
+
+@cli.group(chain=True)
+def session():
+    """All commands related to session handling"""
+    pass
+
+
+@cli.group(chain=True)
+def user():
+    """All commands related to users"""
     pass
 
 
@@ -75,46 +101,62 @@ def init(force, config):
         create_config_file(filename=config, force=force)
 
 
-@cli.command()
+@session.command()
 @global_options
-def start_session(config):
+def start(config):
+    """Starts a new Doker session"""
     try:
         conf = get_config(config)
+        start_session(config=conf, file=config)
     except ConfigError as ce:
         logger.error(ce)
-    try:
-        res = start_new_session(server=conf.server)
-        token = token_re.findall(res)[0]
-        conf = update_token(config=conf, token=token)
-        try:
-            create_config(config=conf, file=config, force=True)
-        except ConfigError as ce:
-            logger.error(ce)
-        logger.info("New session started")
-    except SessionError as se:
-        logger.error(se)
 
 
-@cli.command()
+@session.command()
 @global_options
-def stop_session(config):
+def stop(config):
+    """Stops the current Doker session - all data will be deleted"""
     try:
         conf = get_config(config)
+        stop_session(config=conf, file=config)
     except ConfigError as ce:
         logger.error(ce)
+
+
+@session.command()
+@global_options
+@sub_global_option
+def join(config, user, token):
+    """Adds you to the current active Doker session"""
     try:
-        res = end_session(server=conf.server, token=conf.session.token)
-        if res:
-            logger.info("Session stopped")
-            conf = update_token(config=conf, token="")
-            try:
-                create_config(config=conf, file=config, force=True)
-            except ConfigError as ce:
-                logger.error(ce)
-        else:
-            logger.error("Unable to stop session")
-    except SessionError as se:
-        logger.error(se)
+        conf = get_config(config)
+        join_session(config=conf, file=config, name=user, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@session.command()
+@global_options
+@sub_global_option
+def leave(config, user, token):
+    """Removes you from the current active Doker session"""
+    try:
+        conf = get_config(config)
+        leave_session(config=conf, file=config, name=user, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
+
+
+@user.command()
+@global_options
+@sub_global_option
+def list(config, user, token):
+    """Adds you to the current active Doker session"""
+    try:
+        conf = get_config(config)
+        get_users(config=conf, token=token)
+    except ConfigError as ce:
+        logger.error(ce)
 
 
 def create_config_file(filename: str, force: bool) -> NoReturn:
@@ -147,16 +189,3 @@ def create_config_file(filename: str, force: bool) -> NoReturn:
         create_config(config=conf, file=filename, force=force)
     except ConfigError as ce:
         logger.error(ce)
-
-
-def update_token(config: Config, token: str) -> Config:
-    conf = Config(
-        Server(
-            config.server.address,
-            int(config.server.port),
-            config.server.endpoint,
-        ),
-        User(config.user.name),
-        Session(token),
-    )
-    return conf
