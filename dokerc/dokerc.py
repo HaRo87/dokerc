@@ -359,7 +359,9 @@ def create_config_file(filename: str, force: bool) -> NoReturn:
         type=str,
     )
     server_port = click.prompt(
-        "Enter the DokerB server port, please", default=5000, type=int
+        "Enter the DokerB server port, please (use '0' if not port is required)",
+        default=5000,
+        type=int,
     )
     server_endpoint = click.prompt(
         "Enter the DokerB API endpoint, please", default="/api", type=str

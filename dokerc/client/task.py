@@ -2,6 +2,7 @@ import json
 import requests
 from typing import NamedTuple, NoReturn
 from dokerc.config.config import Server
+from dokerc.utils.utils import get_base_url
 
 
 class TaskError(RuntimeError):
@@ -16,10 +17,9 @@ class Task(NamedTuple):
 
 
 def get_tasks_from_session(server: Server, token: str) -> [Task]:
-    url = "{address}:{port}{endpoint}/sessions/{token}/workpackages".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/workpackages".format(
+        base=base,
         token=token,
     )
     try:
@@ -47,10 +47,9 @@ def get_tasks_from_session(server: Server, token: str) -> [Task]:
 
 
 def add_task_to_session(server: Server, token: str, id: str, summary: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/workpackages".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/workpackages".format(
+        base=base,
         token=token,
     )
     try:
@@ -67,10 +66,9 @@ def add_task_to_session(server: Server, token: str, id: str, summary: str) -> No
 def update_task_of_session(
     server: Server, token: str, id: str, effort: float, standard_deviation: float
 ) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/workpackages/{id}".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/workpackages/{id}".format(
+        base=base,
         token=token,
         id=id,
     )
@@ -86,10 +84,9 @@ def update_task_of_session(
 
 
 def delete_task_from_session(server: Server, token: str, id: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/workpackages/{id}".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/workpackages/{id}".format(
+        base=base,
         token=token,
         id=id,
     )
@@ -104,14 +101,11 @@ def delete_task_from_session(server: Server, token: str, id: str) -> NoReturn:
 
 
 def clear_estimate_of_task(server: Server, token: str, id: str) -> NoReturn:
-    url = (
-        "{address}:{port}{endpoint}/sessions/{token}/workpackages/{id}/estimate".format(
-            address=server.address,
-            port=server.port,
-            endpoint=server.endpoint,
-            token=token,
-            id=id,
-        )
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/workpackages/{id}/estimate".format(
+        base=base,
+        token=token,
+        id=id,
     )
     try:
         res = requests.delete(url)

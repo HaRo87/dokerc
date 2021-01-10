@@ -3,6 +3,7 @@ import logging
 import requests
 from typing import NamedTuple, NoReturn
 from dokerc.config.config import Server
+from dokerc.utils.utils import get_base_url
 
 logger = logging.getLogger("DOKERC")
 
@@ -25,10 +26,9 @@ class DelphiEstimate(NamedTuple):
 
 
 def get_estimates_from_session(server: Server, token: str) -> [Estimate]:
-    url = "{address}:{port}{endpoint}/sessions/{token}/estimates".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/estimates".format(
+        base=base,
         token=token,
     )
     try:
@@ -57,10 +57,9 @@ def get_estimates_from_session(server: Server, token: str) -> [Estimate]:
 
 
 def get_estimate_from_session(server: Server, token: str, id: str) -> DelphiEstimate:
-    url = "{address}:{port}{endpoint}/sessions/{token}/estimates/{id}".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/estimates/{id}".format(
+        base=base,
         token=token,
         id=id,
     )
@@ -85,10 +84,9 @@ def get_estimate_from_session(server: Server, token: str, id: str) -> DelphiEsti
 
 
 def list_distant_users_for_estimate(server: Server, token: str, id: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/estimates/{id}/users/distance".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/estimates/{id}/users/distance".format(
+        base=base,
         token=token,
         id=id,
     )
@@ -115,10 +113,9 @@ def add_estimate_to_session(
     most_likely_case: float,
     worst_case: float,
 ) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/estimates".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/estimates".format(
+        base=base,
         token=token,
     )
     try:
@@ -144,10 +141,9 @@ def add_estimate_to_session(
 def delete_estimate_from_session(
     server: Server, token: str, id: str, user: str
 ) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/estimates/{user}/{id}".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/estimates/{user}/{id}".format(
+        base=base,
         token=token,
         user=user,
         id=id,

@@ -1,6 +1,7 @@
 import json
 import requests
 from dokerc.config.config import Server
+from dokerc.utils.utils import get_base_url
 
 
 class UserError(RuntimeError):
@@ -8,10 +9,9 @@ class UserError(RuntimeError):
 
 
 def get_users_from_session(server: Server, token: str) -> [str]:
-    url = "{address}:{port}{endpoint}/sessions/{token}/users".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/users".format(
+        base=base,
         token=token,
     )
     try:

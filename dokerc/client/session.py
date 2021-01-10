@@ -2,6 +2,7 @@ import json
 import requests
 from typing import NoReturn
 from dokerc.config.config import Server
+from dokerc.utils.utils import get_base_url
 
 
 class SessionError(RuntimeError):
@@ -9,9 +10,8 @@ class SessionError(RuntimeError):
 
 
 def start_new_session(server: Server) -> str:
-    url = "{address}:{port}{endpoint}/sessions".format(
-        address=server.address, port=server.port, endpoint=server.endpoint
-    )
+    base = get_base_url(server=server)
+    url = "{base}/sessions".format(base=base)
     try:
         res = requests.post(url)
         values = res.json()
@@ -25,10 +25,9 @@ def start_new_session(server: Server) -> str:
 
 
 def join_existing_session(server: Server, token: str, name: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/users".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/users".format(
+        base=base,
         token=token,
     )
     try:
@@ -43,10 +42,9 @@ def join_existing_session(server: Server, token: str, name: str) -> NoReturn:
 
 
 def leave_existing_session(server: Server, token: str, name: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}/users/{user}".format(
-        address=server.address,
-        port=server.port,
-        endpoint=server.endpoint,
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}/users/{user}".format(
+        base=base,
         token=token,
         user=name,
     )
@@ -61,9 +59,8 @@ def leave_existing_session(server: Server, token: str, name: str) -> NoReturn:
 
 
 def end_session(server: Server, token: str) -> NoReturn:
-    url = "{address}:{port}{endpoint}/sessions/{token}".format(
-        address=server.address, port=server.port, endpoint=server.endpoint, token=token
-    )
+    base = get_base_url(server=server)
+    url = "{base}/sessions/{token}".format(base=base, token=token)
     try:
         res = requests.delete(url)
         if res.status_code != 200:

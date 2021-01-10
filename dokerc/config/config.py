@@ -79,7 +79,7 @@ def get_config(file="") -> Config:
 def validate_config(config: Config) -> NoReturn:
     if not config.server.address:
         raise ConfigError("Invalid server address")
-    if config.server.port <= 0:
+    if config.server.port < 0:
         raise ConfigError("Invalid server port")
     if not config.user.name:
         raise ConfigError("Invalid user name")

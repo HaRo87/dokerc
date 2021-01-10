@@ -17,3 +17,18 @@ def update_token(config: Config, token: str) -> Config:
         Session(token),
     )
     return conf
+
+
+def get_base_url(server: Server) -> str:
+    if server.port == 0:
+        url = "{address}{endpoint}".format(
+            address=server.address,
+            endpoint=server.endpoint,
+        )
+    else:
+        url = "{address}:{port}{endpoint}".format(
+            address=server.address,
+            port=server.port,
+            endpoint=server.endpoint,
+        )
+    return url
