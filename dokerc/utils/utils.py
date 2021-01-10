@@ -20,7 +20,7 @@ def update_token(config: Config, token: str) -> Config:
 
 
 def get_base_url(server: Server) -> str:
-    if server.port == 0:
+    if int(server.port) == 0:
         url = "{address}{endpoint}".format(
             address=server.address,
             endpoint=server.endpoint,
