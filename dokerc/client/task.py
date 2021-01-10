@@ -54,7 +54,8 @@ def add_task_to_session(server: Server, token: str, id: str, summary: str) -> No
         token=token,
     )
     try:
-        res = requests.post(url, data={"id": id, "summary": summary})
+        payload = {"id": id, "summary": summary}
+        res = requests.post(url, json=payload)
         if res.status_code != 200:
             values = res.json()
             raise TaskError(values["reason"])
@@ -74,9 +75,8 @@ def update_task_of_session(
         id=id,
     )
     try:
-        res = requests.put(
-            url, data={"effort": effort, "standarddeviation": standard_deviation}
-        )
+        payload = {"effort": effort, "standarddeviation": standard_deviation}
+        res = requests.put(url, json=payload)
         if res.status_code != 200:
             values = res.json()
             raise TaskError(values["reason"])

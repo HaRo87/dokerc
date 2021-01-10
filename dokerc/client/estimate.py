@@ -69,7 +69,7 @@ def get_estimate_from_session(server: Server, token: str, id: str) -> DelphiEsti
         values = res.json()
         if res.status_code == 200:
             est = values["estimate"]
-            dest = DelphiEstimate(est["Effort"], est["StandardDeviation"])
+            dest = DelphiEstimate(est["effort"], est["standarddeviation"])
             message = values["message"]
             if message == "warning":
                 logger.warning(values["hint"])
@@ -122,15 +122,16 @@ def add_estimate_to_session(
         token=token,
     )
     try:
+        payload = {
+            "b": best_case,
+            "id": id,
+            "m": most_likely_case,
+            "user": user,
+            "w": worst_case,
+        }
         res = requests.post(
             url,
-            data={
-                "id": id,
-                "user": user,
-                "b": best_case,
-                "m": most_likely_case,
-                "w": worst_case,
-            },
+            json=payload,
         )
         if res.status_code != 200:
             values = res.json()

@@ -49,7 +49,7 @@ def get_estimate(config: Config, token: str, id: str) -> NoReturn:
         click.echo(
             "ID: {id}; Effort: {effort}; Standard-Deviation: {standard_deviation}".format(
                 id=id,
-                user=estimate.effort,
+                effort=estimate.effort,
                 standard_deviation=estimate.standard_deviation,
             )
         )
@@ -79,6 +79,8 @@ def add_estimate(
 ) -> NoReturn:
     if token:
         config = update_token(config=config, token=token)
+    if not user:
+        user = config.user.name
     try:
         add_estimate_to_session(
             server=config.server,

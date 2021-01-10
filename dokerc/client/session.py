@@ -32,7 +32,8 @@ def join_existing_session(server: Server, token: str, name: str) -> NoReturn:
         token=token,
     )
     try:
-        res = requests.post(url, data={"name": name})
+        payload = {"name": name}
+        res = requests.post(url, json=payload)
         if res.status_code != 200:
             values = res.json()
             raise SessionError(values["reason"])
